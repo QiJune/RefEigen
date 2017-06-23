@@ -1,13 +1,13 @@
-#include <iostream>
 #ifndef ONLY_CPU
 #include "cuda_runtime.h"
 #define EIGEN_USE_GPU
 #endif
 
-
+#include <iostream>
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/CXX11/Tensor>
+
 template <typename T>
 using Vec = Eigen::TensorMap<Eigen::Tensor<T, 1, Eigen::RowMajor, Eigen::DenseIndex>,
   Eigen::Aligned>;
