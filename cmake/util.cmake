@@ -1,0 +1,6 @@
+macro(compile_cu_as_cpp)
+    foreach(s ${ARGN})
+        set_source_files_properties(${s} PROPERTIES LANGUAGE CXX)
+        set_source_files_properties(${s} PROPERTIES COMPILE_FLAGS "-x c++")
+    endforeach()
+endmacro()
