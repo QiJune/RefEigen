@@ -1,13 +1,13 @@
 #include <iostream>
-// #define EIGEN_USE_THREADS
+#ifndef ONLY_CPU
+#include "cuda_runtime.h"
+#define EIGEN_USE_GPU
+#endif
+
+
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/CXX11/Tensor>
-
-
-template <typename T>
-using EigenVectorArrayMap = Eigen::Map<Eigen::Array<T, Eigen::Dynamic, 1> >;
-
 template <typename T>
 using Vec = Eigen::TensorMap<Eigen::Tensor<T, 1, Eigen::RowMajor, Eigen::DenseIndex>,
   Eigen::Aligned>;
@@ -34,20 +34,40 @@ int main() {
     t_a[i] = i;
     t_b[i] = i;
   }
+  
+#ifndef ONLY_CPU
+  float* d_a;
+  float* d_b;
+  float* d_c;
+  cudaMalloc((void**)&d_a, size * sizeof(float));
+  cudaMalloc((void**)&d_b, size * sizeof(float));
+  cudaMalloc((void**)&d_c, size * sizeof(float));
+
+  cudaMemcpy(d_a, t_a, size * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_b, t_b, size * sizeof(float), cudaMemcpyHostToDevice);
+  
+  Vec<float> a(d_a, size);
+  Vec<float> b(d_b, size);
+  Vec<float> c(d_c, size);
+ 
+  Eigen::CudaStreamDevice sd;
+  Eigen::GpuDevice dd(&sd);
+  c.device(dd) = a + b;
+
+  cudaMemcpy(t_c, d_c, size * sizeof(float), cudaMemcpyDeviceToHost);
+  print<float>(t_c, size);
+
+#else
 
   Vec<float> a(t_a, size);
   Vec<float> b(t_b, size);
   Vec<float> c(t_c, size);
 
-  {
-    Eigen::DefaultDevice dd;
-    c.device(dd) = a + b;
-  }
+  Eigen::DefaultDevice dd;
+  c.device(dd) = a + b;
+  print<float>(t_c, size);
 
-//  {
-//    Eigen::ThreadPoolDevice dd(4 /* number of threads to use */);
-//    c.device(dd) = a + b;
-//  }
+#endif
 
   return 0;
 }
