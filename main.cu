@@ -25,14 +25,8 @@ void print(T* input, int size) {
   std::cout << std::endl;
 }
 
-void test_add(int size) {
-  float* t_a = (float*)malloc(size * sizeof(float));
-  float* t_b = (float*)malloc(size * sizeof(float));
-  float* t_c = (float*)malloc(size * sizeof(float));
-  for (int i = 0; i < size; i++) {
-    t_a[i] = i;
-    t_b[i] = i;
-  }
+
+void test_add(int size, float* t_a, float* t_b, float* t_c) {
 
 #ifndef ONLY_CPU
   float* d_a;
@@ -71,22 +65,12 @@ void test_add(int size) {
   print<float>(t_c, size);
 
 #endif
-  free(t_a);
-  free(t_b);
-  free(t_c);
 }
 
-void test_mul(int size) {
+void test_mul(int size, float* t_a, float* t_b, float* t_c) {
 
   int width = sqrt(size);
   int height = width;
-  float* t_a = (float*)malloc(size * sizeof(float));
-  float* t_b = (float*)malloc(size * sizeof(float));
-  float* t_c = (float*)malloc(size * sizeof(float));
-  for (int i = 0; i < size; i++) {
-    t_a[i] = i;
-    t_b[i] = i;
-  }
 
   Eigen::array<Eigen::IndexPair<Eigen::DenseIndex>, 1> dim_pair;
   dim_pair[0].first = 1;
@@ -124,21 +108,30 @@ void test_mul(int size) {
   Matrix<float> b(t_b, height, width);
   Matrix<float> c(t_c, height, width);
 
-
-
-
   Eigen::DefaultDevice dd;
   c.device(dd) = a.contract(b, dim_pair);
   print<float>(t_c, size);
 
 #endif
-  free(t_a);
-  free(t_b);
-  free(t_c);
 }
 
 int main() {
-  test_add(10);
-  test_mul(4);
+  int size = 4;
+  
+  float* t_a = (float*)malloc(size * sizeof(float));
+  float* t_b = (float*)malloc(size * sizeof(float));
+  float* t_c = (float*)malloc(size * sizeof(float));
+  for (int i = 0; i < size; i++) {
+    t_a[i] = i;
+    t_b[i] = i;
+  }
+
+  test_add(size, t_a, t_b, t_c);
+  test_mul(size, t_a, t_b, t_c);
+
+  free(t_a);
+  free(t_b);
+  free(t_c);
+
   return 0;
 }
