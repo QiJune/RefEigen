@@ -56,6 +56,10 @@ int main() {
 
   cudaMemcpy(t_c, d_c, size * sizeof(float), cudaMemcpyDeviceToHost);
   print<float>(t_c, size);
+  
+  cudaFree(d_a);
+  cudaFree(d_b);
+  cudaFree(d_c);
 
 #else
 
@@ -68,6 +72,9 @@ int main() {
   print<float>(t_c, size);
 
 #endif
+  free(t_a);
+  free(t_b);
+  free(t_c);
 
   return 0;
 }
